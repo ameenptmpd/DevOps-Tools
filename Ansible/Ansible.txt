@@ -1,0 +1,132 @@
+ansible
+-------
+Working: 
+	Ansible works by connecting to nodes(SSH) and pushing out small programs—called modules—to these nodes. 
+	Modules are used to accomplish automation tasks in Ansible. 
+	These programs are written to be resource models of the desired state of the system.
+Steps:
+------
+	1) Create user-in both master and worker nodes
+		- same username and password
+			- create user
+				useradd -m -s /bin/bash ameenpt
+			- set password for the user
+				passwd ameenpt
+		- add this user in to sudo group - ansible needs administrative permission
+				usermod -aG sudo ameenpt
+		- disable password based authentication for sudo users
+			- https://code-maven.com/enable-ansible-passwordless-sudo
+			
+				visudo 
+					- in this page change 
+						%sudo   ALL=(ALL:ALL) ALL
+								to 
+						%sudo   ALL=(ALL:ALL) NOPASSWD: ALL" 
+					- save it.
+			- for confirming it is changed or not
+				cat /etc/sudoers
+		- enable password based authentication for ssh(in worker node)
+			- login as ameenpt
+				sudo su ameenpt
+			- update /etc/ssh/sshd_config
+				sudo vi /etc/ssh/sshd_config 
+					- in this page change 
+							PasswordAuthenication no
+								to 
+							PasswordAuthenication yes
+									(In this file we can set section time out interval for ssh login
+										ClientAliveInterval 1200
+										ClientAliveCountMax 3
+									)
+					- save it
+						
+		- restart the ssh service
+				sudo systemctl restart sshd.service
+		
+
+		- Create ssh key in master node and copy thet into worker node
+			-In worker node create a .ssh directory for copy the public key from master node
+				- login as ameenpt
+					sudo su ameenpt
+					cd 
+					mkdir -p ~/.ssh
+					touch ~/.ssh/authorized_keys
+					chmod -R 700 ~/.ssh
+					chmod 600 ~/.ssh/*
+			-In master node create ssh key and copy
+				- create ssh key
+					sudo su - ameenpt
+					ssh-keygen -t rsa
+				- copy id_rsa.pub to worker node
+					ssh-copy-id ameenpt@<private_ip>
+	2) Install ansible
+		sudo apt update
+		sudo apt upgrade
+		
+		sudo apt install python3 python3-pip
+		sudo apt-get install software-properties-common
+		
+		sudo apt-add-repository --yes --update ppa:ansible/ansible
+		sudo apt install python3-pip                              # required only when pip3 is not a installed
+		
+		sudo apt-get install ansible
+		pip3 install --user ansible
+		ansible --version
+		export PATH=$PATH:/hpme/ameenpt/.local/bin                # setting path variable for ansible
+		
+	3) Add inventory file in master node (adding workernodes into the master)
+		The default location of inventory file is etc/ansible
+		- change owner of the ansible directory as the created new user
+			cd /etc
+			sudo chown ameenpt:ameenpt ansible
+			cd /etc/ansible
+			chmod 777 .
+		- add inventory entries in hosts file
+			sudo nano hosts
+		in this hosts file add:
+			[backend]
+			<ip_address of workernodes>
+			
+			eg:
+				[backend]  # host group name
+				172.23.35.108 # IP address associated with this host group. 
+		
+		
+		
+	4)  adhoc commands for testing
+		-for checking
+				--------
+					ansible backend -m ping
+						it will display like
+								172.31.37.108 | SUCCESS => {
+									"ansible_facts": {
+										"discovered_interpreter_python": "/usr/bin/python3"
+									},
+									"changed": false,
+									"ping": "pong"
+								}
+				--------
+					 ansible backend -m shell -a "mkdir test"
+						it will create a folder in worker node home directory
+	5) Playbook 
+		- create playbook file and save it(yaml file)
+			eg:for creating a file named ameen.txt	
+				---
+				- hosts: all
+				  become: true
+				  tasks:
+				  - name: Create file named ameen.txt
+					file:
+					  path: /tmp/ameen.txt
+					  state: touch
+			
+		- save this playbook as a yaml file
+		- Execute the playbook file
+			ansible-playbook <filename.yaml> -kK
+			
+					-k: This option prompts you for the SSH password when connecting to the target servers. 
+						It's useful when you don't have SSH keys set up for authentication and need to enter the password manually.
+
+					-K: This option prompts you for the privilege escalation (sudo) password when executing tasks 
+						that require elevated privileges on the target servers.
+						It's useful when tasks in your playbook require sudo or root access.
