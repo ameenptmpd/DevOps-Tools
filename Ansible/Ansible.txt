@@ -91,7 +91,7 @@ Steps:
 				[backend]  # host group name
 				172.23.35.108 # IP address associated with this host group. 
 		
-		
+============================================================================================================================================		
 		
 	4)  adhoc commands for testing
 		-for checking
@@ -108,6 +108,9 @@ Steps:
 				--------
 					 ansible backend -m shell -a "mkdir test"
 						it will create a folder in worker node home directory
+
+============================================================================================================================================
+
 	5) Playbook 
 		- create playbook file and save it(yaml file)
 			eg:for creating a file named ameen.txt	
@@ -130,3 +133,110 @@ Steps:
 					-K: This option prompts you for the privilege escalation (sudo) password when executing tasks 
 						that require elevated privileges on the target servers.
 						It's useful when tasks in your playbook require sudo or root access.
+						
+============================================================================================================================================
+
+	6)Ansible role
+	
+	- create an ansible role
+			Prerequisites:
+					Ansible installed on your control machine.
+					A target host where you want to install Nginx.
+
+	Step 1: 
+		- Create the Role Directory Structure
+
+			- Ansible roles 
+				follow a specific directory structure. 
+				You can use the ansible-galaxy command to generate the initial structure:
+							bash
+								ansible-galaxy init Demorole					# It will create a template folder
+								sudo apt update -y && sudo apt install tree		# installing tree tool for viewing directory structure(it is not mandatory)
+								tree Demorole									# code for viewing directory structure
+									
+									It will show like the below
+									
+										ubuntu@ip-172-31-43-45:~$ tree Demorole/
+										Demorole/
+										├── README.md
+										├── defaults			# This directory contains default variable values for your role. 
+										│   └── main.yml		# These variables can be overridden in your playbook if needed.
+										│
+										├── files				# files: This directory can contain files that need to be copied to the target machine during role execution. 
+										│						# These files are usually static and don't require any templating.
+										│
+										├── handlers			# Handlers are used to trigger actions when notified by tasks. This file defines the handlers for this role.
+										│   └── main.yml
+										│
+										├── meta				# This file contains metadata about the role, such as its dependencies and supported platforms.
+										│   └── main.yml
+										│
+										├── tasks				# This is the main playbook for your role, where you define the tasks that should be performed by the role. 
+										│   └── main.yml	
+										│
+										├── templates			# This directory can contain template files that are processed by Ansible's template module. 
+										│						# Templates allow you to dynamically generate files based on variables.
+										│
+										├── tests
+										│   ├── inventory		# tests/inventory: This is where you can define an inventory file specifically for testing this role.
+										│   └── test.yml		# tests/test.yml: This is a test playbook that you can use to test your role.
+										│
+										└── vars				# This directory contains variables that are used within the role tasks or templates.
+											└── main.yml
+ 
+
+
+	Step 2:
+		-Define Role Tasks
+			- Edit the tasks/main.yml file 
+					- inside the role directory (Demorole/tasks/main.yml) 
+					- define the tasks for your role. 
+					- Add the following yaml content and save it:
+						- The below tasks will update the package cache, install Nginx, and start the Nginx service on the target host.
+							yaml
+
+							---		# this line is required
+							- name: Update APT package cache
+							  become: yes
+							  apt:
+								update_cache: yes
+
+							- name: Install Nginx
+							  become: yes
+							  apt:
+								name: nginx
+								state: present
+
+							- name: Start Nginx service
+							  become: yes
+							  service:
+								name: nginx
+								state: started
+								enabled: yes
+
+	Step 3: Create a Playbook to Use the Role
+		- Create a playbook that uses the role we are created. 
+			- For example, create a file named my_playbook.yml:
+
+					yaml
+
+					---
+					- hosts: all #will work on ubuntu only 
+					  become: yes
+					  roles:
+						- Demorole
+
+			This playbook specifies the target hosts (web_servers) and assigns the Demorole to those hosts.
+			
+	Step 4: Run the Playbook
+		- Now, we can run the playbook to install Nginx on the target host(s). 
+				ansible-playbook -i <inventory_file> my_playbook.yml
+								# Replace <inventory_file> with the path to our inventory file, which should contain the IP address or hostname of the target host(s).
+
+	Step 6: Verify Nginx Installation
+		- After the playbook has completed successfully, we can verify Nginx's installation and status on the target host(s):
+		
+						ansible <target_host> -m command -a "nginx -v"  # Check Nginx version
+
+			That's it! we are created a simple Ansible role and used it in a playbook to install and configure Nginx on a remote host. 
+			You can expand on this by adding more tasks, variables, and roles to manage various aspects of your infrastructure.
