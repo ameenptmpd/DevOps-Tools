@@ -1,0 +1,60 @@
+1. In the server node :
+
+	- Terraform installation - 
+		https://developer.hashicorp.com/terraform/tutorials/aws-get-started/install-cli
+		
+	- Install aws cli on server node
+		https://linuxhint.com/install_aws_cli_ubuntu/
+
+			sudo apt-get update
+			sudo apt-get install awscli
+
+2. Create an access key in aws console 
+	- login as root user -
+		click on the profile name → security credentials → go to access keys section → click create access key and create it.
+		it will create and show Access key and Secret access key copy both keys
+
+3. In the server node configure the aws connection 
+	- then configure the Access key, Secret access, region name and output format
+			aws configure
+				AWS Access Key ID [****************CUW2]: 
+				AWS Secret Access Key [****************5YUx]:
+				Default region name [us-east-2]:
+				Default output format [json]:
+
+4. Create a Terraform configuration file with extension .tf
+
+ eg: the Terraform configuration file for create an EC2 Ubuntu instance using Terraform.
+		Create a directory for your Terraform configuration and navigate to it in your terminal.
+			mkdir terraform_project
+			cd terraform_project
+			vi main.tf # add below code
+				provider "aws" {
+				  region = "us-east-2"  #region
+				  shared_credentials_files = ["~/.aws/credentials"] # Optional if you want to specify a credentials file
+				}
+
+				resource "aws_instance" "app_server" {
+				  instance_type = "t2.micro"
+				  key_name      = "ohiokey"
+
+				  ami           = "ami-0430580de6244e02e"
+	
+				  tags = {
+				    Name = "ExampleAppServerInstance"
+				  }
+				}
+
+
+5. Initialize the Terraform workspace by running the following command in server node
+			terraform init
+			terraform plan  # optional - command is used to create an execution plan in Terraform.
+					# This execution plan provides a preview of the changes that Terraform will make to your infrastructure based on the current configuration and the state of the existing resources. 
+
+6. To execute the terraform configuration file main.tf
+			terraform apply
+
+6. To destroy the EC2 instance when you're done by executing this configuration file
+			terraform destroy
+
+
