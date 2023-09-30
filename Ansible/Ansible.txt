@@ -80,7 +80,7 @@ Steps:
 			cd /etc
 			sudo chown ameenpt:ameenpt ansible
 			cd /etc/ansible
-			chmod 777 .
+			chmod 777 *
 		- add inventory entries in hosts file
 			sudo nano hosts
 		in this hosts file add:
