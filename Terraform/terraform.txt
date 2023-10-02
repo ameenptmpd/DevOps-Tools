@@ -78,7 +78,7 @@ resource "aws_instance" "docker_instance" {
     sudo systemctl enable docker
     sudo usermod -aG docker ec2-user
   EOF
-
+vpc_security_group_ids = ["sg-0305049858ab22e8f"]
   tags = {
     Name = "DockerInstance"
   }
