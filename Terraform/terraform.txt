@@ -74,10 +74,12 @@ resource "aws_instance" "docker_instance" {
 
   user_data = <<-EOF
     #!/bin/bash
-    sudo amazon-linux-extras install docker
+    sudo apt-get update -y
+    sudo apt-get install -y docker.io
     sudo systemctl start docker
     sudo systemctl enable docker
-    sudo usermod -aG docker ec2-user
+    sudo usermod -aG docker ubuntu
+
   EOF
 security_groups=["launch-wizard"]
   tags = {
