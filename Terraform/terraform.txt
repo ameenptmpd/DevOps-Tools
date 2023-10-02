@@ -58,3 +58,29 @@
 			terraform destroy
 
 
+
+
+instance with docker
+--------------------
+provider "aws" {
+  region = "us-east-2"
+}
+
+resource "aws_instance" "docker_instance" {
+  ami           = "ami-0430580de6244e02e"
+  instance_type = "t2.micro"
+  key_name      = "your-key-name"
+
+  user_data = <<-EOF
+    #!/bin/bash
+    sudo amazon-linux-extras install docker
+    sudo systemctl start docker
+    sudo systemctl enable docker
+    sudo usermod -aG docker ec2-user
+  EOF
+
+  tags = {
+    Name = "DockerInstance"
+  }
+}
+
