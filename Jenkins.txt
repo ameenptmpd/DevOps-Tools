@@ -238,6 +238,6 @@ then
 fi
 docker run -d -p 8089:8080 --name java-web-app-cicd java-web-app-cicd
 mvn test
-docker login -u ameenpt -p dckr_pat_NwBKiKxVg6j-k7EKlKJkkec9_8o
+docker login -u ameenpt -p dckr_pat_6j-k7EKlKJkkec9_8o
 docker commit java-web-app-cicd ameenpt/java-web-app-cicd:latest
 docker push ameenpt/java-web-app-cicd:latest
