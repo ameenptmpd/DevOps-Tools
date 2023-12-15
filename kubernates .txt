@@ -29,8 +29,8 @@ Following has to be executed on all nodes unless mentioned otherwise (till init)
 	exclude=kubelet kubeadm kubectl
 	EOF
 
-3. sudo yum clean all
-4. sudo yum -y makecache
+3. sudo yum clean all && sudo yum -y makecache
+4. sudo yum -y install epel-release vim git curl wget kubelet kubeadm kubectl --disableexcludes=kubernetes
 
 5. sudo yum -y install  kubelet kubeadm kubectl --disableexcludes=kubernetes
 	#epel-release
