@@ -159,9 +159,9 @@ troubleshoot for join command -
 tocken format -
 
 
-kubeadm token create --print-join-command
+	kubeadm token create --print-join-command
 
-	When you run this command on your Kubernetes master node, it will generate a new token and provide you with the complete kubeadm join command, including the correct token and SHA-256 hash of the CA certificate. You can then use this command on your worker nodes to join them to the Kubernetes cluster.
+When you run this command on your Kubernetes master node, it will generate a new token and provide you with the complete kubeadm join command, including the correct token and SHA-256 hash of the CA certificate. You can then use this command on your worker nodes to join them to the Kubernetes cluster.
 
 
 kubeadm join 172.31.31.177:6443 --token <valid_token> --discovery-token-ca-cert-hash <valid_sha256_hash>
